@@ -10,6 +10,8 @@ public class ThirdPersonMovement : MonoBehaviour
     public PlayerFeet feet;
     public float speed;
     public float jumpSpeed;
+    [Range(1, 5)]
+    public int maxJump = 1;
     public bool keepJumpButtonPressed;
     public bool airControl;
     public float turnSmoothTime;
@@ -21,10 +23,13 @@ public class ThirdPersonMovement : MonoBehaviour
     private float vertical;
     private bool jump = false;
     private bool jumpDone = true;
+    private int nbJumpDone = 0;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        if (maxJump > 1)
+            keepJumpButtonPressed = false;
     }
 
     private void Update()
@@ -42,6 +47,9 @@ public class ThirdPersonMovement : MonoBehaviour
             if (jump)
                 jumpDone = false;
         }
+
+        if (jumpDone && feet.isGrounded)
+            nbJumpDone = 0;
     }
 
     private void FixedUpdate()
@@ -60,27 +68,69 @@ public class ThirdPersonMovement : MonoBehaviour
             Vector3 moveDir = (Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward) * speed;
 
             if (feet.isGrounded || airControl)
-                rb.velocity = new Vector3(moveDir.x, rb.velocity.y, moveDir.z);
-
+            {
+                if (feet.isGrounded && !airControl)
+                    rb.velocity = new Vector3(moveDir.x, rb.velocity.y, moveDir.z);
+                else
+                    rb.MovePosition(transform.position + moveDir * Time.fixedDeltaTime);
+            }
         }
         else if (feet.isGrounded)
         {
             rb.velocity = new Vector3(0f, rb.velocity.y, 0f);
         }
 
-        if (jump && feet.isGrounded && rb.velocity.y == 0f)
+        if (jump && feet.isGrounded && rb.velocity.y == 0f && nbJumpDone == 0)
         {
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
             rb.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
             jump = false;
+            nbJumpDone++;
+            Debug.Log("First Jump");
+            if (maxJump == 1)
+                StartCoroutine(WaitForNextJump());
+            else
+                StartCoroutine(WaitForJump());
+        }
+        else if (jump && nbJumpDone + 1 < maxJump && nbJumpDone != 0)
+        {
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+            rb.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
+            jump = false;
+            nbJumpDone++;
+            StartCoroutine(WaitForJump());
+            Debug.Log("Jump");
+        }
+        else if (jump && nbJumpDone + 1 == maxJump && nbJumpDone != 0)
+        {
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+            rb.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
+            jump = false;
+            nbJumpDone++;
+            Debug.Log("Last Jump");
             StartCoroutine(WaitForNextJump());
         }
     }
 
     private IEnumerator WaitForNextJump()
     {
-        while (feet.isGrounded)
+        float failTimer = 0.5f;
+        float startTime = Time.time;
+
+        while (feet.isGrounded && Time.time < startTime + failTimer)
             yield return null;
         while (!feet.isGrounded)
+            yield return null;
+        jumpDone = true;
+        nbJumpDone = 0;
+    }
+
+    private IEnumerator WaitForJump()
+    {
+        float failTimer = 0.5f;
+        float startTime = Time.time;
+
+        while (feet.isGrounded && Time.time < startTime + failTimer)
             yield return null;
         jumpDone = true;
     }
