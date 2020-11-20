@@ -56,6 +56,8 @@ void ADepressionCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ADepressionCharacter::RunOn);
+	PlayerInputComponent->BindAction("Run", IE_Released, this, &ADepressionCharacter::RunOff);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADepressionCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADepressionCharacter::MoveRight);
@@ -114,7 +116,7 @@ void ADepressionCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		AddMovementInput(Direction, Value*2);
 	}
 }
 
@@ -129,6 +131,17 @@ void ADepressionCharacter::MoveRight(float Value)
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
-		AddMovementInput(Direction, Value);
+		AddMovementInput(Direction, Value*2);
 	}
+}
+
+void ADepressionCharacter::RunOn()
+{
+	lastSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = SprintMaxSpeed;
+}
+
+void ADepressionCharacter::RunOff()
+{
+	GetCharacterMovement()->MaxWalkSpeed = lastSpeed;
 }

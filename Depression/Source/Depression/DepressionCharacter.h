@@ -18,6 +18,10 @@ class ADepressionCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Deplacement, meta = (AllowPrivateAccess = "true"))
+	int SprintMaxSpeed;
+	int lastSpeed;
 public:
 	ADepressionCharacter();
 
@@ -39,6 +43,9 @@ protected:
 
 	/** Called for side to side input */
 	void MoveRight(float Value);
+
+	void RunOn();
+	void RunOff();
 
 	/** 
 	 * Called via input to turn at a given rate. 
