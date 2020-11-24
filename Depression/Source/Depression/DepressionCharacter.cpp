@@ -12,6 +12,22 @@
 //////////////////////////////////////////////////////////////////////////
 // ADepressionCharacter
 
+void ADepressionCharacter::ActorBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	if (OtherActor->ActorHasTag("Climb")) {
+		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Flying;
+		GetCharacterMovement()->SetJumpAllowed(false);
+	}
+}
+
+void ADepressionCharacter::ActorEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	if (OtherActor->ActorHasTag("Climb")) {
+		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Walking;
+		GetCharacterMovement()->SetJumpAllowed(true);
+	}
+}
+
 ADepressionCharacter::ADepressionCharacter()
 {
 	// Set size for collision capsule
@@ -47,6 +63,18 @@ ADepressionCharacter::ADepressionCharacter()
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
 
+void ADepressionCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void ADepressionCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	OnActorBeginOverlap.AddDynamic(this, &ADepressionCharacter::ActorBeginOverlap);
+	OnActorEndOverlap.AddDynamic(this, &ADepressionCharacter::ActorEndOverlap);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -61,6 +89,7 @@ void ADepressionCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADepressionCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADepressionCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveUp", this, &ADepressionCharacter::MoveUp);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
@@ -116,7 +145,7 @@ void ADepressionCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value*2);
+		AddMovementInput(Direction, Value);
 	}
 }
 
@@ -131,7 +160,22 @@ void ADepressionCharacter::MoveRight(float Value)
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
-		AddMovementInput(Direction, Value*2);
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void ADepressionCharacter::MoveUp(float Value)
+{
+	if ((Controller != NULL) && (Value != 0.0f))
+	{
+		// find out which way is right
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get right vector 
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Z);
+		// add movement in that direction
+		AddMovementInput(Direction, Value);
 	}
 }
 

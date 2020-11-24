@@ -22,8 +22,16 @@ class ADepressionCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Deplacement, meta = (AllowPrivateAccess = "true"))
 	int SprintMaxSpeed;
 	int lastSpeed;
+
+	UFUNCTION()
+		void ActorBeginOverlap(AActor* OverlappedActor,AActor* OtherActor);
+	UFUNCTION()
+		void ActorEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 public:
 	ADepressionCharacter();
+
+	virtual void Tick(float DeltaTime) override;
+	virtual void BeginPlay() override;
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
@@ -43,6 +51,7 @@ protected:
 
 	/** Called for side to side input */
 	void MoveRight(float Value);
+	void MoveUp(float Value);
 
 	void RunOn();
 	void RunOff();
