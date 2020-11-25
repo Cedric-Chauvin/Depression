@@ -18,10 +18,16 @@ class ADepressionCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	bool IsClimbing;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Deplacement, meta = (AllowPrivateAccess = "true"))
 	int SprintMaxSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Deplacement, meta = (AllowPrivateAccess = "true"))
+		int ClimbMaxSpeed;
 	int lastSpeed;
+
+	class AActor* WallActor;
 
 	UFUNCTION()
 		void ActorBeginOverlap(AActor* OverlappedActor,AActor* OtherActor);

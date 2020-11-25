@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ADepressionCharacter
@@ -17,6 +18,10 @@ void ADepressionCharacter::ActorBeginOverlap(AActor* OverlappedActor, AActor* Ot
 	if (OtherActor->ActorHasTag("Climb")) {
 		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Flying;
 		GetCharacterMovement()->SetJumpAllowed(false);
+		IsClimbing = true;
+		WallActor = OtherActor;
+		lastSpeed = GetCharacterMovement()->MaxFlySpeed;
+		GetCharacterMovement()->MaxFlySpeed = ClimbMaxSpeed;
 	}
 }
 
@@ -25,6 +30,9 @@ void ADepressionCharacter::ActorEndOverlap(AActor* OverlappedActor, AActor* Othe
 	if (OtherActor->ActorHasTag("Climb")) {
 		GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Walking;
 		GetCharacterMovement()->SetJumpAllowed(true);
+		IsClimbing = false;
+		WallActor = nullptr;
+		GetCharacterMovement()->MaxFlySpeed = lastSpeed;
 	}
 }
 
@@ -66,6 +74,12 @@ ADepressionCharacter::ADepressionCharacter()
 void ADepressionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (IsClimbing && WallActor != nullptr) {
+		float rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), WallActor->GetActorLocation()).GetComponentForAxis(EAxis::Z);
+		FRotator rotator = GetActorRotation();
+		rotator.SetComponentForAxis(EAxis::Z, rotation);
+		SetActorRotation(rotator);
+	}
 }
 
 void ADepressionCharacter::BeginPlay()
