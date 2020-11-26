@@ -25,7 +25,8 @@ class ADepressionCharacter : public ACharacter
 	int SprintMaxSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Deplacement, meta = (AllowPrivateAccess = "true"))
 		int ClimbMaxSpeed;
-	int lastSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Deplacement, meta = (AllowPrivateAccess = "true"))
+		int WalkMaxSpeed;
 
 	class AActor* WallActor;
 

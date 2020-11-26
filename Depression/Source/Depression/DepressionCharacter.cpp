@@ -20,7 +20,6 @@ void ADepressionCharacter::ActorBeginOverlap(AActor* OverlappedActor, AActor* Ot
 		GetCharacterMovement()->SetJumpAllowed(false);
 		IsClimbing = true;
 		WallActor = OtherActor;
-		lastSpeed = GetCharacterMovement()->MaxFlySpeed;
 		GetCharacterMovement()->MaxFlySpeed = ClimbMaxSpeed;
 	}
 }
@@ -32,7 +31,7 @@ void ADepressionCharacter::ActorEndOverlap(AActor* OverlappedActor, AActor* Othe
 		GetCharacterMovement()->SetJumpAllowed(true);
 		IsClimbing = false;
 		WallActor = nullptr;
-		GetCharacterMovement()->MaxFlySpeed = lastSpeed;
+		GetCharacterMovement()->MaxFlySpeed = WalkMaxSpeed;
 	}
 }
 
@@ -195,11 +194,10 @@ void ADepressionCharacter::MoveUp(float Value)
 
 void ADepressionCharacter::RunOn()
 {
-	lastSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = SprintMaxSpeed;
 }
 
 void ADepressionCharacter::RunOff()
 {
-	GetCharacterMovement()->MaxWalkSpeed = lastSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = WalkMaxSpeed;
 }
