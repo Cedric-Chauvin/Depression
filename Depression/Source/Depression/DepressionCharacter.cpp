@@ -74,7 +74,8 @@ void ADepressionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (IsClimbing && WallActor != nullptr) {
-		float rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), WallActor->GetActorLocation()).GetComponentForAxis(EAxis::Z);
+
+		float rotation = WallActor->GetActorRotation().GetComponentForAxis(EAxis::Z);
 		FRotator rotator = GetActorRotation();
 		rotator.SetComponentForAxis(EAxis::Z, rotation);
 		SetActorRotation(rotator);
@@ -166,14 +167,20 @@ void ADepressionCharacter::MoveRight(float Value)
 {
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
+		if (IsClimbing) {
+			AddMovementInput(GetActorForwardVector(), 0.1);
+			AddMovementInput(GetActorRightVector(), Value);
+		}
+		else {
+			// find out which way is right
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+			// get right vector 
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			// add movement in that direction
+			AddMovementInput(Direction, Value);
+		}
 	}
 }
 
