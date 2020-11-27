@@ -103,7 +103,6 @@ void ADepressionCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADepressionCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADepressionCharacter::MoveRight);
-	PlayerInputComponent->BindAxis("MoveUp", this, &ADepressionCharacter::MoveUp);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
@@ -153,13 +152,20 @@ void ADepressionCharacter::MoveForward(float Value)
 {
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		if (IsClimbing)
+		{
+			AddMovementInput(GetActorForwardVector(), Value>0 ? Value/10 : Value/100);
+			AddMovementInput(GetActorUpVector(), Value);
+		}
+		else {
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
 	}
 }
 
@@ -181,21 +187,6 @@ void ADepressionCharacter::MoveRight(float Value)
 			// add movement in that direction
 			AddMovementInput(Direction, Value);
 		}
-	}
-}
-
-void ADepressionCharacter::MoveUp(float Value)
-{
-	if ((Controller != NULL) && (Value != 0.0f))
-	{
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Z);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
 	}
 }
 
