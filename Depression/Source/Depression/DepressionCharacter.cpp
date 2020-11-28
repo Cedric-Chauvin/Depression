@@ -21,6 +21,7 @@ void ADepressionCharacter::ActorBeginOverlap(AActor* OverlappedActor, AActor* Ot
 		IsClimbing = true;
 		WallActor = OtherActor;
 		GetCharacterMovement()->MaxFlySpeed = ClimbMaxSpeed;
+		JumpCurrentCount = 0;
 	}
 }
 
