@@ -88,6 +88,7 @@ void ADepressionCharacter::BeginPlay()
 	Super::BeginPlay();
 	OnActorBeginOverlap.AddDynamic(this, &ADepressionCharacter::ActorBeginOverlap);
 	OnActorEndOverlap.AddDynamic(this, &ADepressionCharacter::ActorEndOverlap);
+	GetCharacterMovement()->MaxWalkSpeed = WalkMaxSpeed;
 }
 
 //////////////////////////////////////////////////////////////////////////
